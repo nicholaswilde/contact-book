@@ -156,7 +156,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Your Name - [@twitter_handle](https://twitter.com/twitter_handle) - email
+Nicholas Wilde - [about.me](https://about.me/nicholas.wilde/) - ncwilde43@gmail.com
 
 Project Link: [https://github.com/nicholaswilde/contact-book](https://github.com/nicholaswilde/contact-book)
 
@@ -165,7 +165,7 @@ Project Link: [https://github.com/nicholaswilde/contact-book](https://github.com
 <!-- ACKNOWLEDGEMENTS -->
 ## Acknowledgements
 
-* []()
+* [Icon](https://www.iconfinder.com/icons/2639797/card_contact_icon)
 * []()
 * []()
 
