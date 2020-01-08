@@ -35,6 +35,13 @@ class ContactDatabase:
         except Error as e:
             log.error(e)
 
+    def print_contacts(self, contacts):
+        data = [['a', 'b', 'c'], ['aaaaaaaaaa', 'b', 'c'], ['a', 'bbbbbbbbbb', 'c']]
+
+        col_width = max(len(word) for row in data for word in row) + 2  # padding
+        for row in data:
+            print("".join(word.ljust(col_width) for word in row))
+
     def close_connection(self):
         self.conn.close()
 
@@ -50,6 +57,7 @@ def test():
     db.create_connection(':memory:')
     db.create_contacts_table()
     db.create_contact(('John', 'Doe'))
+    db.print_contacts(None)
 
 if __name__ == "__main__":
     test()
