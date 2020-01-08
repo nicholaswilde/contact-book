@@ -1,65 +1,55 @@
+import logging as log
 import sqlite3 as sqlite
-
+from sqlite3 import Error
 
 class ContactDatabase:
     def __init__(self):
         self.conn = None
 
     def create_connection(self, db_file):
-        """ create a database connection to a SQLite database """
         try:
             self.conn = sqlite.connect(db_file)
-            print(sqlite.version)
+            log.info('Connection established')
+            self.cursor = self.conn.cursor()
+            return self.conn
         except Error as e:
-            print(e)
-        return self.conn
+            log.error(e)
 
-    def create_table(self, create_table_sql):
-        """ create a table from the create_table_sql statement
-        :param conn: Connection object
-        :param create_table_sql: a CREATE TABLE statement
-        :return:
-        """
+    def create_contacts_table(self):
+        sql_create_contacts_table = """ CREATE TABLE IF NOT EXISTS contacts (
+                                        id integer PRIMARY KEY,
+                                        first_name text NOT NULL,
+                                        last_name text
+                                    ); """
         try:
-            c = self.conn.cursor()
-            c.execute(create_table_sql)
+            self.cursor.execute(sql_create_contacts_table)
         except Error as e:
-            print(e)
+            log.error(e)
+
+    def create_contact(self, contact):
+        sql = ''' INSERT INTO contacts(first_name,last_name)
+                  VALUES(?,?) '''
+        try:
+            self.cursor.execute(sql, contact)
+            return self.cursor.lastrowid
+        except Error as e:
+            log.error(e)
 
     def close_connection(self):
         self.conn.close()
 
-
     def __del__(self):
-        if self.conn != None:
-            print(f'Closing connection')
+        if self.conn:
+            log.info('Closing connection')
             self.conn.close()
 
 
 def test():
-    contacts_table = "contacts"
+    log.basicConfig(level=log.INFO)
     db = ContactDatabase()
     db.create_connection(':memory:')
-    sql_create_projects_table = """ CREATE TABLE IF NOT EXISTS projects (
-                                        id integer PRIMARY KEY,
-                                        name text NOT NULL,
-                                        begin_date text,
-                                        end_date text
-                                    ); """
-
-    sql_create_tasks_table = """CREATE TABLE IF NOT EXISTS tasks (
-                                    id integer PRIMARY KEY,
-                                    name text NOT NULL,
-                                    priority integer,
-                                    status_id integer NOT NULL,
-                                    project_id integer NOT NULL,
-                                    begin_date text NOT NULL,
-                                    end_date text NOT NULL,
-                                    FOREIGN KEY (project_id) REFERENCES projects (id)
-                                );"""
-
-    db.create_table(sql_create_projects_table)
-
+    db.create_contacts_table()
+    db.create_contact(('John', 'Doe'))
 
 if __name__ == "__main__":
     test()
