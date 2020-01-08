@@ -1,21 +1,25 @@
-import random
+import logging as log
 
 class Contact:
-    def __init__(self, first_name, last_name=None):
-        """
-        https://stackoverflow.com/a/4843178/1061279
-        """
-        if not isinstance(first_name, str): raise TypeError(first_name)
-        self.first_name = first_name
-        self.last_name = last_name
-        self.id = random.randrange(10)
+    def __init__(self, contact):
+        if not isinstance(contact, tuple): raise TypeError(contact)
+        self.id = contact[0]
+        self.first_name = contact[1]
+        self.last_name = contact[2]
+
+    def to_tuple(self):
+        l = [value for value in vars(self).values()]
+        t = tuple(l)
+        return t
+
 
 def main():
-    """"""
-    c = Contact(last_name="Doe", first_name="John")
-    print(c.first_name)
-    print(c.last_name)
-    print(c.id)
+    log.basicConfig(level=log.INFO)
+    c = Contact((1, "Doe", "John"))
+    log.info(c.first_name)
+    log.info(c.last_name)
+    log.info(c.id)
+    log.info(c.to_tuple())
 
 
 if __name__ == "__main__":
