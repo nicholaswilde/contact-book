@@ -1,4 +1,4 @@
-import logging as log
+from log import log
 import sqlite3 as sqlite
 from sqlite3 import Error
 
@@ -48,7 +48,7 @@ class ContactDatabase:
             log.error(e)
 
     def get_header(self, format_header=True):
-        rows = self.get_all_contacts()
+        self.get_all_contacts()
         header_list = []
         if self.cursor.description:
             header_list = [value[0] for value in self.cursor.description]
@@ -88,7 +88,6 @@ class ContactDatabase:
 
 
 def test():
-    log.basicConfig(level=log.INFO)
     db = ContactDatabase()
     db.create_connection(':memory:')
     db.create_contacts_table()
