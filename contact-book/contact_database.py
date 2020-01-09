@@ -2,6 +2,17 @@ import logging as log
 import sqlite3 as sqlite
 from sqlite3 import Error
 
+
+def _get_col_width(data):
+    return max(len(str(word)) for row in data for word in row) + 2 # Padding
+
+
+def _format_header(value):
+    value = value.replace('_',' ')
+    value = value.title()
+    return value
+
+
 class ContactDatabase:
     def __init__(self):
         self.conn = None
@@ -31,16 +42,41 @@ class ContactDatabase:
                   VALUES(?,?) '''
         try:
             self.cursor.execute(sql, contact)
+            self.conn.commit()
             return self.cursor.lastrowid
         except Error as e:
             log.error(e)
 
-    def print_contacts(self, contacts):
-        data = [['a', 'b', 'c'], ['aaaaaaaaaa', 'b', 'c'], ['a', 'bbbbbbbbbb', 'c']]
+    def get_header(self, format_header=True):
+        rows = self.get_all_contacts()
+        header_list = []
+        if self.cursor.description:
+            header_list = [value[0] for value in self.cursor.description]
+            if format_header:
+                header_list = map(_format_header, header_list)
+        t = tuple(header_list)
+        return t
 
-        col_width = max(len(word) for row in data for word in row) + 2  # padding
-        for row in data:
-            print("".join(word.ljust(col_width) for word in row))
+    def _add_header(self, contacts):
+        header_list = self.get_header(True)
+        contacts.insert(0, header_list)
+        separator_list = ["".ljust(len(str(word)), '-') for word in header_list]
+        contacts.insert(1, separator_list)
+        return contacts
+
+    def print_contacts(self, contacts, include_header=True):
+        if include_header:
+            contacts = self._add_header(contacts)
+        col_width = _get_col_width(contacts)
+        for row in contacts:
+            print("".join(str(word).ljust(col_width) for word in row))
+
+    def get_all_contacts(self):
+        try:
+            self.cursor.execute("SELECT * FROM contacts")
+            return self.cursor.fetchall()
+        except Error as e:
+            log.error(e)
 
     def close_connection(self):
         self.conn.close()
@@ -57,7 +93,8 @@ def test():
     db.create_connection(':memory:')
     db.create_contacts_table()
     db.create_contact(('John', 'Doe'))
-    db.print_contacts(None)
+    contacts = db.get_all_contacts()
+    print(db.print_contacts(contacts))
 
 if __name__ == "__main__":
     test()
