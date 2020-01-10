@@ -1,15 +1,18 @@
 import sys
-from contact_database import ContactDatabase
 
 MIN_PYTHON = (3,6)
 if sys.version_info<MIN_PYTHON:
     sys.exit('Python %s.%s or later is required.\n' % MIN_PYTHON)
 
-from cmd import Cmd
 import os
+from cmd import Cmd
+from builtins import any as b_any
 from log import log
+from contact_database import ContactDatabase
 
-DEFAULT_DB = 'contact-book.db'
+dirname = os.path.dirname(__file__)
+
+DEFAULT_DB = os.path.join(dirname, '../data/contact-book.db')
 
 class ContactBookPrompt(Cmd):
     def __init__(self, input_file):
@@ -22,7 +25,7 @@ class ContactBookPrompt(Cmd):
         self.do_open(input_file)
 
     def do_add(self, inp):
-        pass
+        d = _parse_input(inp)
 
     def help_add(self):
         print("Add a new entry to the system.")
@@ -41,22 +44,23 @@ class ContactBookPrompt(Cmd):
 
     def help_exit(self):
         print("Exit the application. Shorthand: x q Ctrl-D.")
-        
+
     def do_file(self, ignore):
         print(self.file)
-        
+
     def help_file(self):
         print('List the database file')
-        
+
     def do_list(self, ignore):
         contacts = self.db.get_all_contacts()
         self.db.print_contacts(contacts)
-    
+
     def help_list(self):
         print("List all contacts")
 
     def do_open(self, inp):
         if inp:
+            self.file = inp
             self.db.create_connection(inp)
             self.db.create_contacts_table()
         else:
@@ -69,7 +73,22 @@ class ContactBookPrompt(Cmd):
         if inp == 'x' or inp == 'q':
             return self.do_exit(inp)
 
-def main():    
+def _parse_input(inp):
+    l = list(filter(None, inp.split(' ')))
+
+    if b_any("=" in x for x in l):
+        character = "="
+        l = [m.split(character, 1) for m in l]
+    elif b_any(":" in x for x in l):
+        character = ":"
+        l = [m.split(character, 1) for m in l]
+
+    d = {}
+    if l:
+        d = dict(l)
+    return d
+
+def main():
     if len(sys.argv) == 2:
         input_file = sys.argv[1]
     elif len(sys.argv) == 1:
